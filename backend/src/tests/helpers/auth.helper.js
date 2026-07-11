@@ -1,20 +1,23 @@
 const request = require("supertest");
 const app = require("../../app");
+const User = require("../../modules/user/models/user.model");
+const { hashPassword } = require("../../shared/utils/password.utils");
 
 /**
- * Registers an admin user and returns a valid JWT.
+ * Creates an admin user directly in the database and returns a valid JWT.
  */
 const createAdminToken = async () => {
     const credentials = {
         name: "Admin",
         email: `admin-${Date.now()}@test.com`,
         password: "Password123",
-        role: "ADMIN",
     };
 
-    await request(app)
-        .post("/api/auth/register")
-        .send(credentials);
+    await User.create({
+        ...credentials,
+        password: await hashPassword(credentials.password),
+        role: "ADMIN",
+    });
 
     const login = await request(app)
         .post("/api/auth/login")

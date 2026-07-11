@@ -56,7 +56,7 @@ describe("POST /api/vehicles", () => {
 
         expect(response.body.data.quantity).toBe(10);
 
-        expect(response.body.data).toHaveProperty("_id");
+        expect(response.body.data).toHaveProperty("id");
     });
 
 });
@@ -157,5 +157,36 @@ it("should reject unknown request fields", async () => {
 });
 
 it("should reject CUSTOMER users from creating vehicles", async () => {
-   //todo implementation
+    const customerPayload = {
+        name: "Customer User",
+        email: `customer-${Date.now()}@test.com`,
+        password: "Password123",
+    };
+
+    await request(app)
+        .post("/api/auth/register")
+        .send(customerPayload);
+
+    const loginResponse = await request(app)
+        .post("/api/auth/login")
+        .send({
+            email: customerPayload.email,
+            password: customerPayload.password,
+        });
+
+    const token = loginResponse.body.data.token;
+
+    const response = await request(app)
+        .post("/api/vehicles")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+            make: "Toyota",
+            model: "Fortuner",
+            category: "SUV",
+            price: 4200000,
+            quantity: 5,
+        });
+
+    expect(response.status).toBe(403);
+    expect(response.body.success).toBe(false);
 });

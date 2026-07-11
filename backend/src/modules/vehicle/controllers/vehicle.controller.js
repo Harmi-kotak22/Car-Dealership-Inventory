@@ -6,7 +6,7 @@ const { toVehicleDto } = require("../dtos/vehicle.dto");
  */
 const create = async (req, res, next) => {
     try {
-        const vehicle = await createVehicle(req.body);
+        const vehicle = await createVehicle(req.validatedData);
 
         return res.status(201).json({
             success: true,
