@@ -29,3 +29,25 @@ describe("POST /api/auth/register", () => {
         expect(response.body.data).not.toHaveProperty("password");
     });
 });
+
+it("should not register a user with an existing email", async () => {
+    const user = {
+        name: "John Doe",
+        email: "john@example.com",
+        password: "Password123",
+    };
+
+    await request(app)
+        .post("/api/auth/register")
+        .send(user);
+
+    const response = await request(app)
+        .post("/api/auth/register")
+        .send(user);
+
+    expect(response.status).toBe(409);
+
+    expect(response.body.success).toBe(false);
+
+    expect(response.body.message).toBe("Email already exists");
+});
