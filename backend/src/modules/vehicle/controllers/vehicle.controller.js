@@ -1,4 +1,4 @@
-const { createVehicle,getAllVehicles, searchVehicles, purchaseVehicle, updateVehicle, deleteVehicle, } = require("../services/vehicle.service");
+const { createVehicle,getAllVehicles, searchVehicles, purchaseVehicle, updateVehicle, deleteVehicle, restockVehicle,} = require("../services/vehicle.service");
 const { toVehicleDto } = require("../dtos/vehicle.dto");
 
 /**
@@ -111,6 +111,29 @@ const remove = async (req, res, next) => {
     }
 
 };
+/**
+ * Restocks a vehicle.
+ */
+const restock = async (req, res, next) => {
+
+    try {
+
+        const vehicle = await restockVehicle(
+            req.params.id,
+            req.validatedData.quantity
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Vehicle restocked successfully",
+            data: toVehicleDto(vehicle),
+        });
+
+    } catch (error) {
+        next(error);
+    }
+
+};
 module.exports = {
     createVehicle: create,
      getAllVehicles: getAll,
@@ -118,4 +141,5 @@ module.exports = {
      purchaseVehicle: purchase,
       updateVehicle: update,
        deleteVehicle: remove,
+       restockVehicle: restock,
 };

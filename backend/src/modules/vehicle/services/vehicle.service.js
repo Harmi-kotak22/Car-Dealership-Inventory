@@ -151,6 +151,25 @@ const deleteVehicle = async (vehicleId) => {
 
     return;
 };
+/**
+ * Restocks a vehicle by increasing its inventory quantity.
+ *
+ * Business Rules:
+ * - Vehicle must exist.
+ */
+const restockVehicle = async (vehicleId, quantity) => {
+
+    const vehicle = await vehicleRepository.findVehicleById(vehicleId);
+
+    if (!vehicle) {
+        throw new ApiError(404, "Vehicle not found");
+    }
+
+    vehicle.quantity += quantity;
+
+    return vehicleRepository.saveVehicle(vehicle);
+
+};
 
 module.exports = {
     createVehicle,
@@ -159,4 +178,5 @@ module.exports = {
     purchaseVehicle,
     updateVehicle,
     deleteVehicle,
+    restockVehicle,
 };

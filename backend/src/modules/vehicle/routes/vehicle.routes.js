@@ -6,7 +6,7 @@ const validate = require("../../../shared/middleware/validate.middleware");
 const updateVehicleSchema = require("../validators/updateVehicleSchema");
 const createVehicleSchema = require("../validators/createVehicle.validator");
 const vehicleController = require("../controllers/vehicle.controller");
-
+const restockVehicleSchema = require("../validators/restockVehicle.schema");
 const router = express.Router();
 
 /**
@@ -48,5 +48,15 @@ router.delete(
     authenticate,
     authorize("ADMIN"),
     vehicleController.deleteVehicle
+);
+/**
+ * Only administrators can restock inventory.
+ */
+router.post(
+    "/:id/restock",
+    authenticate,
+    authorize("ADMIN"),
+    validate(restockVehicleSchema),
+    vehicleController.restockVehicle
 );
 module.exports = router;
