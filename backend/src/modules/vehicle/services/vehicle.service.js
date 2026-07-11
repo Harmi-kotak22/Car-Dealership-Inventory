@@ -8,6 +8,8 @@ const { ZodError } = require("zod");
 const createVehicleSchema = require("../validators/createVehicle.validator");
 const vehicleRepository = require("../repositories/vehicle.repository");
 const { findAllVehicles } = require("../repositories/vehicle.repository");
+const mongoose = require("mongoose");
+const ApiError = require("../../../shared/errors/ApiError");
 /**
  * Creates a new vehicle after validating the request payload.
  */
@@ -76,8 +78,30 @@ const searchVehicles = async (filters) => {
 
     return vehicleRepository.searchVehicles(query);
 };
+/**
+ * Updates an existing vehicle.
+ */
+const updateVehicle = async (vehicleId, updates) => {
+
+    // Reject malformed MongoDB ids.
+    if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
+        throw new ApiError(400, "Invalid vehicle id");
+    }
+
+    const vehicle = await vehicleRepository.updateVehicle(
+        vehicleId,
+        updates
+    );
+
+    if (!vehicle) {
+        throw new ApiError(404, "Vehicle not found");
+    }
+
+    return vehicle;
+};
 module.exports = {
     createVehicle,
     getAllVehicles,
     searchVehicles,
+    updateVehicle,
 };

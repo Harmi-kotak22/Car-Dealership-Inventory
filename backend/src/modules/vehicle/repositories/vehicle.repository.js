@@ -18,10 +18,24 @@ const searchVehicles = (filters) => {
     return Vehicle.find(filters)
         .sort({ createdAt: -1 });
 };
+/**
+ * Updates a vehicle by its identifier.
+ */
+const updateVehicle = async (vehicleId, updates) => {
+    return Vehicle.findByIdAndUpdate(
+        vehicleId,
+        updates,
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
+};
 
 module.exports = {
     create,
     findAllVehicles,
     searchVehicles,
+    updateVehicle,
 };
 

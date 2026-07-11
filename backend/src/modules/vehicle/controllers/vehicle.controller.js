@@ -1,4 +1,4 @@
-const { createVehicle,getAllVehicles, searchVehicles, } = require("../services/vehicle.service");
+const { createVehicle,getAllVehicles, searchVehicles, updateVehicle, } = require("../services/vehicle.service");
 const { toVehicleDto } = require("../dtos/vehicle.dto");
 
 /**
@@ -50,8 +50,30 @@ const search = async (req, res, next) => {
         next(error);
     }
 };
+
+/**
+ * Updates an existing vehicle.
+ */
+const update = async (req, res, next) => {
+    try {
+        const vehicle = await updateVehicle(
+            req.params.id,
+            req.validatedData
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Vehicle updated successfully",
+            data: toVehicleDto(vehicle),
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 module.exports = {
     createVehicle: create,
      getAllVehicles: getAll,
      searchVehicles: search,
+      updateVehicle: update,
 };
