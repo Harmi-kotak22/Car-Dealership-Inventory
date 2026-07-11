@@ -20,7 +20,7 @@ app.get("/health", (req, res) => {
         message: "Server is running"
     });
 });
-app.use("/api/test", testRoutes);
+//app.use("/api/test", testRoutes);
 
 app.use("/api/auth", authRoutes);
 
