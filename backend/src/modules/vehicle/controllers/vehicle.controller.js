@@ -1,4 +1,4 @@
-const { createVehicle,getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, } = require("../services/vehicle.service");
+const { createVehicle,getAllVehicles, searchVehicles, purchaseVehicle, updateVehicle, deleteVehicle, } = require("../services/vehicle.service");
 const { toVehicleDto } = require("../dtos/vehicle.dto");
 
 /**
@@ -52,6 +52,22 @@ const search = async (req, res, next) => {
 };
 
 /**
+ * Purchases a vehicle by decrementing its stock.
+ */
+const purchase = async (req, res, next) => {
+    try {
+        const vehicle = await purchaseVehicle(req.params.id);
+
+        return res.status(200).json({
+            success: true,
+            data: toVehicleDto(vehicle),
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Updates an existing vehicle.
  */
 const update = async (req, res, next) => {
@@ -94,6 +110,7 @@ module.exports = {
     createVehicle: create,
      getAllVehicles: getAll,
      searchVehicles: search,
+     purchaseVehicle: purchase,
       updateVehicle: update,
        deleteVehicle: remove,
 };

@@ -18,6 +18,10 @@ const searchVehicles = (filters) => {
     return Vehicle.find(filters)
         .sort({ createdAt: -1 });
 };
+const findVehicleById = async (vehicleId) => {
+    return Vehicle.findById(vehicleId);
+};
+
 /**
  * Updates a vehicle by its identifier.
  */
@@ -45,6 +49,7 @@ module.exports = {
     create,
     findAllVehicles,
     searchVehicles,
+    findVehicleById,
     updateVehicle,
     deleteVehicle,
 };

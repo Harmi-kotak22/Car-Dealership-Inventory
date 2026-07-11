@@ -30,6 +30,12 @@ router.get(
     authenticate,
     vehicleController.getAllVehicles
 );
+router.post(
+    "/:id/purchase",
+    authenticate,
+    authorize("CUSTOMER"),
+    vehicleController.purchaseVehicle
+);
 router.put(
     "/:id",
     authenticate,

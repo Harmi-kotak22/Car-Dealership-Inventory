@@ -30,6 +30,35 @@ const createAdminToken = async () => {
 
     return login.body.data.token;
 };
+
+/**
+ * Creates a customer user directly in the database and returns a valid JWT.
+ */
+const createCustomerToken = async () => {
+
+    const credentials = {
+        name: "Customer",
+        email: `customer-${Date.now()}@test.com`,
+        password: "Password123",
+    };
+
+    await User.create({
+        ...credentials,
+        password: await hashPassword(credentials.password),
+        role: "CUSTOMER",
+    });
+
+    const login = await request(app)
+        .post("/api/auth/login")
+        .send({
+            email: credentials.email,
+            password: credentials.password,
+        });
+
+    return login.body.data.token;
+
+};
 module.exports = {
     createAdminToken,
+     createCustomerToken,
 };

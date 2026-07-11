@@ -30,6 +30,30 @@ const createVehicle = async (payload) => {
 };
 
 /**
+ * Purchases a vehicle by decrementing its stock by one.
+ */
+const purchaseVehicle = async (vehicleId) => {
+    if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
+        throw new ApiError(400, "Invalid vehicle id");
+    }
+
+    const vehicle = await vehicleRepository.findVehicleById(vehicleId);
+
+    if (!vehicle) {
+        throw new ApiError(404, "Vehicle not found");
+    }
+
+    if (vehicle.quantity <= 0) {
+        throw new ApiError(400, "Vehicle is out of stock");
+    }
+
+    vehicle.quantity -= 1;
+    await vehicle.save();
+
+    return vehicle;
+};
+
+/**
  * Retrieves all vehicles from inventory.
  */
 const getAllVehicles = async () => {
@@ -126,6 +150,7 @@ module.exports = {
     createVehicle,
     getAllVehicles,
     searchVehicles,
+    purchaseVehicle,
     updateVehicle,
     deleteVehicle,
 };
