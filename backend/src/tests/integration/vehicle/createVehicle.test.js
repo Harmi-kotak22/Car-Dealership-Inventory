@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("../../../app");
-const User = require("../../../modules/user/models/user.model");
-const { hashPassword } = require("../../../shared/utils/password.utils");
+const { createAdminToken } = require("../../helpers/auth.helper");
+
 describe("POST /api/vehicles", () => {
 
     it("should reject unauthenticated requests", async () => {
@@ -29,31 +29,11 @@ describe("POST /api/vehicles", () => {
 describe("POST /api/vehicles", () => {
 
     it("should allow an ADMIN to create a vehicle", async () => {
-
-        // Register admin
-        // Create admin directly in database
-        await User.create({
-            name: "Admin User",
-            email: "admin@test.com",
-            password: await hashPassword("Password123"),
-            role: "ADMIN",
-        });
-
-        // Login
-        const loginResponse = await request(app)
-            .post("/api/auth/login")
-            .send({
-                email: "admin@test.com",
-                password: "Password123"
-            });
-
-        expect(loginResponse.status).toBe(200);
-
-        const token = loginResponse.body.data.token;
+        const adminToken = await createAdminToken();
 
         const response = await request(app)
             .post("/api/vehicles")
-            .set("Authorization", `Bearer ${token}`)
+            .set("Authorization", `Bearer ${adminToken}`)
             .send({
                 make: "Toyota",
                 model: "Fortuner",
@@ -80,8 +60,102 @@ describe("POST /api/vehicles", () => {
     });
 
 });
+it("should reject a vehicle without make", async () => {
 
-it("should reject customers from adding vehicles", async () => {
+    const adminToken = await createAdminToken();
 
-    // TODO after login implementation
+    const response = await request(app)
+        .post("/api/vehicles")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({
+            model: "Fortuner",
+            category: "SUV",
+            price: 100,
+            quantity: 5,
+        });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.success).toBe(false);
+});
+it("should reject invalid vehicle category", async () => {
+
+    const adminToken = await createAdminToken();
+
+    const response = await request(app)
+        .post("/api/vehicles")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({
+            make: "Toyota",
+            model: "Fortuner",
+            category: "Bike",
+            price: 100,
+            quantity: 5,
+        });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.success).toBe(false);
+});
+it("should reject negative vehicle price", async () => {
+
+    const adminToken = await createAdminToken();
+
+    const response = await request(app)
+        .post("/api/vehicles")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({
+            make: "Toyota",
+            model: "Fortuner",
+            category: "SUV",
+            price: -500,
+            quantity: 5,
+        });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.success).toBe(false);
+});
+it("should reject negative quantity", async () => {
+
+    const adminToken = await createAdminToken();
+
+    const response = await request(app)
+        .post("/api/vehicles")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({
+            make: "Toyota",
+            model: "Fortuner",
+            category: "SUV",
+            price: 200,
+            quantity: -2,
+        });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.success).toBe(false);
+});
+it("should reject unknown request fields", async () => {
+
+    const adminToken = await createAdminToken();
+
+    const response = await request(app)
+        .post("/api/vehicles")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({
+            make: "Toyota",
+            model: "Fortuner",
+            category: "SUV",
+            price: 200,
+            quantity: 5,
+            color: "Black",
+        });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.success).toBe(false);
+});
+
+it("should reject CUSTOMER users from creating vehicles", async () => {
+   //todo implementation
 });

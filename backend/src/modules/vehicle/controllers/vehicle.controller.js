@@ -1,4 +1,5 @@
 const { createVehicle } = require("../services/vehicle.service");
+const { toVehicleDto } = require("../dtos/vehicle.dto");
 
 /**
  * Creates a new vehicle.
@@ -9,7 +10,7 @@ const create = async (req, res, next) => {
 
         return res.status(201).json({
             success: true,
-            data: vehicle,
+            data: toVehicleDto(vehicle),
         });
     } catch (error) {
         next(error);
