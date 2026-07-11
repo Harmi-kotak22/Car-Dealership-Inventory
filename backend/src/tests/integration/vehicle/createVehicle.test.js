@@ -1,6 +1,7 @@
 const request = require("supertest");
 const app = require("../../../app");
-
+const User = require("../../../modules/user/models/user.model");
+const { hashPassword } = require("../../../shared/utils/password.utils");
 describe("POST /api/vehicles", () => {
 
     it("should reject unauthenticated requests", async () => {
@@ -30,14 +31,13 @@ describe("POST /api/vehicles", () => {
     it("should allow an ADMIN to create a vehicle", async () => {
 
         // Register admin
-        await request(app)
-            .post("/api/auth/register")
-            .send({
-                name: "Admin User",
-                email: "admin@test.com",
-                password: "Password123",
-                role: "ADMIN"
-            });
+        // Create admin directly in database
+        await User.create({
+            name: "Admin User",
+            email: "admin@test.com",
+            password: await hashPassword("Password123"),
+            role: "ADMIN",
+        });
 
         // Login
         const loginResponse = await request(app)
@@ -46,6 +46,8 @@ describe("POST /api/vehicles", () => {
                 email: "admin@test.com",
                 password: "Password123"
             });
+
+        expect(loginResponse.status).toBe(200);
 
         const token = loginResponse.body.data.token;
 
@@ -82,9 +84,4 @@ describe("POST /api/vehicles", () => {
 it("should reject customers from adding vehicles", async () => {
 
     // TODO after login implementation
-});
-
-it("should create vehicle successfully", async () => {
-
-    // TODO after JWT generation
 });

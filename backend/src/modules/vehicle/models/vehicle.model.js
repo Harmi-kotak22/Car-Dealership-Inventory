@@ -1,5 +1,5 @@
 const { Schema, model: _model } = require("mongoose");
-const VEHICLE_CATEGORIES = require("../../shared/constants/vehicleCategories");
+const VEHICLE_CATEGORIES = require("../../../shared/constants/vehicleCategories");
 
 const vehicleSchema = new Schema(
     {

@@ -1,3 +1,16 @@
+const createVehicleSchema = require("../validators/createVehicle.validator");
+const vehicleRepository = require("../repositories/vehicle.repository");
+
 /**
- * Vehicle business logic will be implemented in the next TDD iteration.
+ * Validates vehicle payload and delegates persistence
+ * to the repository layer.
  */
+const createVehicle = async (payload) => {
+    const validatedData = createVehicleSchema.parse(payload);
+
+    return vehicleRepository.create(validatedData);
+};
+
+module.exports = {
+    createVehicle,
+};

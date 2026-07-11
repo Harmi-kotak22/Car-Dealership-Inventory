@@ -1,4 +1,12 @@
+const Vehicle = require("../models/vehicle.model");
+
 /**
- * Repository implementation will be added once persistence logic
- * is introduced in the next iteration.
+ * Persists a new vehicle in MongoDB.
  */
+const create = async (vehicleData) => {
+    return Vehicle.create(vehicleData);
+};
+
+module.exports = {
+    create,
+};

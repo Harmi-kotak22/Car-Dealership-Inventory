@@ -8,8 +8,7 @@ const vehicleController = require("../controllers/vehicle.controller");
 const router = express.Router();
 
 /**
- * Only administrators can add new vehicles to the inventory.
- * Business logic will be implemented incrementally through TDD.
+ * Only administrators can add vehicles.
  */
 router.post(
     "/",

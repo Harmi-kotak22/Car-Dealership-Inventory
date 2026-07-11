@@ -5,7 +5,7 @@ const morgan = require("morgan");
 const authRoutes = require("./modules/auth/routes/auth.routes");
 const vehicleRoutes = require("./modules/vehicle/routes/vehicle.routes");
 const testRoutes = require("./tests/testRoutes");
-
+const { ZodError } = require("zod");
 const app = express();
 
 app.use(cors());
@@ -25,6 +25,13 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use((err, req, res, next) => {
+    if (err instanceof ZodError) {
+        return res.status(400).json({
+            success: false,
+            message: err.errors[0].message,
+        });
+    }
+
     console.error(err);
 
     return res.status(err.statusCode || 500).json({
