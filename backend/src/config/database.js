@@ -1,17 +1,21 @@
-import { connect } from "mongoose";
-import { MONGODB_URI } from "./env";
+const mongoose = require("mongoose");
+const env = require("./env");
 
-const connectDatabase = async () => {
+const connectDatabase = async (databaseName) => {
     try {
-        await connect(MONGODB_URI);
+        await mongoose.connect(env.MONGODB_URI, {
+            dbName: databaseName,
+        });
 
-        console.log("✅ MongoDB connected successfully");
+        console.log(`✅ MongoDB connected successfully (${databaseName})`);
     } catch (error) {
-        console.error("❌ MongoDB connection failed")
+        console.error("❌ MongoDB connection failed");
         console.error(error.message);
 
         process.exit(1);
     }
 };
 
-export default { connectDatabase };
+module.exports = {
+    connectDatabase,
+};

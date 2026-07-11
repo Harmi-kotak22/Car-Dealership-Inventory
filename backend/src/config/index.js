@@ -1,7 +1,7 @@
-const env = require("./env");
-const connectDatabase = require("./database").default;
+import env from "./env";
+import { connectDatabase } from "./database";
 
-module.exports = {
+export default {
     env,
-    connectDatabase
+    connectDatabase,
 };
