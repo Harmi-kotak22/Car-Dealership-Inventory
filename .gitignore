@@ -1,0 +1,25 @@
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node / backend
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/.env
+backend/.npm/
+backend/logs/
+
+# Frontend / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/

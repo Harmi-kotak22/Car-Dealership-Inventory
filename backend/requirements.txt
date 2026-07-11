@@ -1,0 +1,12 @@
+express
+cors
+dotenv
+helmet
+joi
+jsonwebtoken
+mongoose
+morgan
+bcryptjs
+jest
+nodemon
+supertest
