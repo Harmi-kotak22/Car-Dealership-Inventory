@@ -1,18 +1,17 @@
 const userRepository = require("../../user/repositories/user.repository");
 const { hashPassword } = require("../../../shared/utils/password.utils");
+const ApiError = require("../../../shared/errors/ApiError");
 
 const registerUser = async ({ name, email, password }) => {
-    const existingUser = await userRepository.findByEmail(email);
-
+    const existingUser = await userRepository.findUserByEmail(email);
     if (existingUser) {
-        const error = new Error("Email already exists");
-        error.statusCode = 409;
-        throw error;
-    }
+    throw new ApiError(409, "Email already exists");
+}
+    
 
     const hashedPassword = await hashPassword(password);
 
-    const user = await userRepository.create({
+    const user = await userRepository.createUser({
         name,
         email,
         password: hashedPassword,
