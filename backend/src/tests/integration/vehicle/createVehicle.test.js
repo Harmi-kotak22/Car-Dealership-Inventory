@@ -23,6 +23,62 @@ describe("POST /api/vehicles", () => {
 
 });
 
+
+
+describe("POST /api/vehicles", () => {
+
+    it("should allow an ADMIN to create a vehicle", async () => {
+
+        // Register admin
+        await request(app)
+            .post("/api/auth/register")
+            .send({
+                name: "Admin User",
+                email: "admin@test.com",
+                password: "Password123",
+                role: "ADMIN"
+            });
+
+        // Login
+        const loginResponse = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: "admin@test.com",
+                password: "Password123"
+            });
+
+        const token = loginResponse.body.data.token;
+
+        const response = await request(app)
+            .post("/api/vehicles")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                make: "Toyota",
+                model: "Fortuner",
+                category: "SUV",
+                price: 4200000,
+                quantity: 10
+            });
+
+        expect(response.status).toBe(201);
+
+        expect(response.body.success).toBe(true);
+
+        expect(response.body.data.make).toBe("Toyota");
+
+        expect(response.body.data.model).toBe("Fortuner");
+
+        expect(response.body.data.category).toBe("SUV");
+
+        expect(response.body.data.price).toBe(4200000);
+
+        expect(response.body.data.quantity).toBe(10);
+
+        expect(response.body.data).toHaveProperty("_id");
+    });
+
+});
+
 it("should reject customers from adding vehicles", async () => {
 
     // TODO after login implementation
