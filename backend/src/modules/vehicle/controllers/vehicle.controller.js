@@ -52,19 +52,24 @@ const search = async (req, res, next) => {
 };
 
 /**
- * Purchases a vehicle by decrementing its stock.
+ * Purchases a vehicle.
  */
 const purchase = async (req, res, next) => {
+
     try {
+
         const vehicle = await purchaseVehicle(req.params.id);
 
-        return res.status(200).json({
+        return res.status(201).json({
             success: true,
+            message: "Vehicle purchased successfully",
             data: toVehicleDto(vehicle),
         });
+
     } catch (error) {
         next(error);
     }
+
 };
 
 /**

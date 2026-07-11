@@ -30,8 +30,13 @@ const createVehicle = async (payload) => {
 };
 
 /**
- * Purchases a vehicle by decrementing its stock by one.
+ * Purchases a vehicle by decreasing its inventory quantity.
+ *
+ * Business Rules:
+ * - Vehicle must exist.
+ * - Vehicle must have available stock.
  */
+
 const purchaseVehicle = async (vehicleId) => {
     if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
         throw new ApiError(400, "Invalid vehicle id");
@@ -146,6 +151,7 @@ const deleteVehicle = async (vehicleId) => {
 
     return;
 };
+
 module.exports = {
     createVehicle,
     getAllVehicles,

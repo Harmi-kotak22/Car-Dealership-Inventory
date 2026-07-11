@@ -18,6 +18,13 @@ const searchVehicles = (filters) => {
     return Vehicle.find(filters)
         .sort({ createdAt: -1 });
 };
+
+/**
+ * Finds a vehicle by its id.
+ *
+ * @param {string} id
+ * @returns {Promise<Vehicle|null>}
+ */
 const findVehicleById = async (vehicleId) => {
     return Vehicle.findById(vehicleId);
 };
@@ -45,6 +52,17 @@ const deleteVehicle = async (vehicleId) => {
     return Vehicle.findByIdAndDelete(vehicleId);
 };
 
+
+/**
+ * Persists changes made to a vehicle.
+ *
+ * @param {Vehicle} vehicle
+ * @returns {Promise<Vehicle>}
+ */
+const saveVehicle = (vehicle) => {
+    return vehicle.save();
+};
+
 module.exports = {
     create,
     findAllVehicles,
@@ -52,5 +70,7 @@ module.exports = {
     findVehicleById,
     updateVehicle,
     deleteVehicle,
+      findVehicleById,
+    saveVehicle,
 };
 
