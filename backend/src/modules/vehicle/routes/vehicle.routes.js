@@ -20,5 +20,9 @@ router.post(
     validate(createVehicleSchema),
     vehicleController.createVehicle
 );
-
+router.get(
+    "/",
+    authenticate,
+    vehicleController.getAllVehicles
+);
 module.exports = router;

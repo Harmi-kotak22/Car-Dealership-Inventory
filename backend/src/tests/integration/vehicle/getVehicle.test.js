@@ -2,34 +2,16 @@ const request = require("supertest");
 
 const app = require("../../../app");
 
-const User = require("../../../modules/user/models/user.model");
-const Vehicle = require("../../../modules/vehicle/models/vehicle.model");
+const { createAdminToken } = require("../../helpers/auth.helper"); const Vehicle = require("../../../modules/vehicle/models/vehicle.model");
 
 describe("GET /api/vehicles", () => {
     let adminToken;
 
     beforeEach(async () => {
-        // Create admin
-        await request(app)
-            .post("/api/auth/register")
-            .send({
-                name: "Admin",
-                email: "admin@example.com",
-                password: "Password123",
-                role: "ADMIN",
-            });
+        await Vehicle.deleteMany({});
 
-        // Login
-        const loginResponse = await request(app)
-            .post("/api/auth/login")
-            .send({
-                email: "admin@example.com",
-                password: "Password123",
-            });
-
-        adminToken = loginResponse.body.data.token;
+        adminToken = await createAdminToken();
     });
-
     it("should return an empty array when no vehicles exist", async () => {
         const response = await request(app)
             .get("/api/vehicles")

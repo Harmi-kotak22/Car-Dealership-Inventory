@@ -1,13 +1,13 @@
 const VEHICLE_CATEGORIES = Object.freeze({
-    SEDAN: "Sedan",
+    SEDAN: "SEDAN",
     SUV: "SUV",
-    HATCHBACK: "Hatchback",
-    TRUCK: "Truck",
-    COUPE: "Coupe",
-    CONVERTIBLE: "Convertible",
-    VAN: "Van",
-    WAGON: "Wagon",
-    CROSSOVER: "Crossover"
+    HATCHBACK: "HATCHBACK",
+    TRUCK: "TRUCK",
+    COUPE: "COUPE",
+    CONVERTIBLE: "CONVERTIBLE",
+    VAN: "VAN",
+    WAGON: "WAGON",
+    CROSSOVER: "CROSSOVER"
 });
 
 module.exports = VEHICLE_CATEGORIES;

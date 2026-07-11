@@ -14,6 +14,7 @@ const toVehicleDto = (vehicle) => ({
     updatedAt: vehicle.updatedAt,
 });
 
+
 module.exports = {
     toVehicleDto,
 };

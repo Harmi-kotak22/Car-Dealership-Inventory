@@ -7,6 +7,8 @@ const { hashPassword } = require("../../shared/utils/password.utils");
  * Creates an admin user directly in the database and returns a valid JWT.
  */
 const createAdminToken = async () => {
+    await User.deleteMany({});
+
     const credentials = {
         name: "Admin",
         email: `admin-${Date.now()}@test.com`,
@@ -28,7 +30,6 @@ const createAdminToken = async () => {
 
     return login.body.data.token;
 };
-
 module.exports = {
     createAdminToken,
 };

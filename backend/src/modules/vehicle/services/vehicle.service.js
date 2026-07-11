@@ -7,7 +7,7 @@ const { ZodError } = require("zod");
 
 const createVehicleSchema = require("../validators/createVehicle.validator");
 const vehicleRepository = require("../repositories/vehicle.repository");
-
+const { findAllVehicles } = require("../repositories/vehicle.repository");
 /**
  * Creates a new vehicle after validating the request payload.
  */
@@ -27,6 +27,13 @@ const createVehicle = async (payload) => {
     }
 };
 
+/**
+ * Retrieves all vehicles from inventory.
+ */
+const getAllVehicles = async () => {
+    return await findAllVehicles();
+};
 module.exports = {
     createVehicle,
+    getAllVehicles,
 };

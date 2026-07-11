@@ -1,4 +1,4 @@
-const { createVehicle } = require("../services/vehicle.service");
+const { createVehicle,getAllVehicles, } = require("../services/vehicle.service");
 const { toVehicleDto } = require("../dtos/vehicle.dto");
 
 /**
@@ -17,6 +17,23 @@ const create = async (req, res, next) => {
     }
 };
 
+/**
+ * Returns all available vehicles.
+ */
+const getAll = async (req, res, next) => {
+    try {
+        const vehicles = await getAllVehicles();
+
+        return res.status(200).json({
+            success: true,
+            data: vehicles.map(toVehicleDto),
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createVehicle: create,
+     getAllVehicles: getAll,
 };
