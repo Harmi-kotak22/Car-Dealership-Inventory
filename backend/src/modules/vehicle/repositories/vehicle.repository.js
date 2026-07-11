@@ -1,7 +1,4 @@
-class VehicleRepository {
-  async findAll() {
-    return [];
-  }
-}
-
-module.exports = new VehicleRepository();
+/**
+ * Repository implementation will be added once persistence logic
+ * is introduced in the next iteration.
+ */

@@ -2,8 +2,7 @@ const express = require("express");
 
 const authenticate = require("../shared/middleware/authenticate.middleware");
 const authorize = require("../shared/middleware/authorize.middleware");
-console.log("authenticate:", typeof authenticate, authenticate);
-console.log("authorize:", typeof authorize, authorize);
+
 const router = express.Router();
 
 router.get(

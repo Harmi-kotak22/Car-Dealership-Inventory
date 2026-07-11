@@ -1,7 +1,3 @@
-class VehicleService {
-  async getAllVehicles() {
-    return [];
-  }
-}
-
-module.exports = new VehicleService();
+/**
+ * Vehicle business logic will be implemented in the next TDD iteration.
+ */

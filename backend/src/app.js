@@ -3,7 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const authRoutes = require("./modules/auth/routes/auth.routes");
-
+const vehicleRoutes = require("./modules/vehicle/routes/vehicle.routes");
 const testRoutes = require("./tests/testRoutes");
 
 const app = express();
@@ -23,7 +23,7 @@ app.get("/health", (req, res) => {
 //app.use("/api/test", testRoutes);
 
 app.use("/api/auth", authRoutes);
-
+app.use("/api/vehicles", vehicleRoutes);
 app.use((err, req, res, next) => {
     console.error(err);
 
