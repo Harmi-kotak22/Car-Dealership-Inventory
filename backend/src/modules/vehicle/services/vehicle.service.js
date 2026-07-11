@@ -33,7 +33,51 @@ const createVehicle = async (payload) => {
 const getAllVehicles = async () => {
     return await findAllVehicles();
 };
+/**
+ * Searches vehicles using optional filters.
+ *
+ * @param {Object} filters
+ * @returns {Promise<Array>}
+ */
+const searchVehicles = async (filters) => {
+
+    const query = {};
+
+    if (filters.make) {
+        query.make = {
+        $regex: filters.make,
+        $options: "i",
+    };
+    }
+
+    if (filters.model) {
+         query.model = {
+        $regex: filters.model,
+        $options: "i",
+    };
+    }
+
+    if (filters.category) {
+        query.category = filters.category;
+    }
+
+    if (filters.minPrice || filters.maxPrice) {
+
+        query.price = {};
+
+        if (filters.minPrice) {
+            query.price.$gte = Number(filters.minPrice);
+        }
+
+        if (filters.maxPrice) {
+            query.price.$lte = Number(filters.maxPrice);
+        }
+    }
+
+    return vehicleRepository.searchVehicles(query);
+};
 module.exports = {
     createVehicle,
     getAllVehicles,
+    searchVehicles,
 };

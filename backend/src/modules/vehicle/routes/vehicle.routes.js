@@ -21,8 +21,14 @@ router.post(
     vehicleController.createVehicle
 );
 router.get(
+    "/search",
+    authenticate,
+    vehicleController.searchVehicles
+);
+router.get(
     "/",
     authenticate,
     vehicleController.getAllVehicles
 );
+
 module.exports = router;

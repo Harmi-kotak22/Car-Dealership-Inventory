@@ -14,8 +14,14 @@ const findAllVehicles = async () => {
     return Vehicle.find().sort({ createdAt: -1 });
 };
 
+const searchVehicles = (filters) => {
+    return Vehicle.find(filters)
+        .sort({ createdAt: -1 });
+};
 
 module.exports = {
     create,
     findAllVehicles,
+    searchVehicles,
 };
+

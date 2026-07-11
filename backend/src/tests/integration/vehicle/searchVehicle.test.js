@@ -16,9 +16,7 @@ describe("GET /api/vehicles/search", () => {
         adminToken = await createAdminToken();
     });
 
-});
-
-it("should return an empty array when no vehicles match", async () => {
+    it("should return an empty array when no vehicles match", async () => {
     const response = await request(app)
         .get("/api/vehicles/search?make=Toyota")
         .set("Authorization", `Bearer ${adminToken}`);
@@ -262,4 +260,5 @@ it("should not expose internal mongoose fields", async () => {
     expect(response.body.data[0]).not.toHaveProperty("_id");
 
     expect(response.body.data[0]).not.toHaveProperty("__v");
+});
 });
