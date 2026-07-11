@@ -99,9 +99,33 @@ const updateVehicle = async (vehicleId, updates) => {
 
     return vehicle;
 };
+/**
+ * Deletes an existing vehicle.
+ *
+ * Ensures that:
+ * - the identifier is valid
+ * - the vehicle exists
+ */
+const deleteVehicle = async (vehicleId) => {
+
+    // Reject malformed MongoDB ObjectIds before querying the database.
+    if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
+        throw new ApiError(400, "Invalid vehicle id");
+    }
+
+    const deletedVehicle =
+        await vehicleRepository.deleteVehicle(vehicleId);
+
+    if (!deletedVehicle) {
+        throw new ApiError(404, "Vehicle not found");
+    }
+
+    return;
+};
 module.exports = {
     createVehicle,
     getAllVehicles,
     searchVehicles,
     updateVehicle,
+    deleteVehicle,
 };

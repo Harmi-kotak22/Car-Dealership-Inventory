@@ -31,11 +31,21 @@ const updateVehicle = async (vehicleId, updates) => {
         }
     );
 };
+/**
+ * Deletes a vehicle by its identifier.
+ *
+ * @param {string} vehicleId - Vehicle identifier.
+ * @returns {Promise<Object|null>}
+ */
+const deleteVehicle = async (vehicleId) => {
+    return Vehicle.findByIdAndDelete(vehicleId);
+};
 
 module.exports = {
     create,
     findAllVehicles,
     searchVehicles,
     updateVehicle,
+    deleteVehicle,
 };
 

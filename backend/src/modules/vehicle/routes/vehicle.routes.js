@@ -37,4 +37,10 @@ router.put(
     validate(updateVehicleSchema),
     vehicleController.updateVehicle
 );
+router.delete(
+    "/:id",
+    authenticate,
+    authorize("ADMIN"),
+    vehicleController.deleteVehicle
+);
 module.exports = router;

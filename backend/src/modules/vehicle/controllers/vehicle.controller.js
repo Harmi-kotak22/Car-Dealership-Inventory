@@ -1,4 +1,4 @@
-const { createVehicle,getAllVehicles, searchVehicles, updateVehicle, } = require("../services/vehicle.service");
+const { createVehicle,getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, } = require("../services/vehicle.service");
 const { toVehicleDto } = require("../dtos/vehicle.dto");
 
 /**
@@ -71,9 +71,29 @@ const update = async (req, res, next) => {
         next(error);
     }
 };
+/**
+ * Deletes an existing vehicle.
+ */
+const remove = async (req, res, next) => {
+
+    try {
+
+        await deleteVehicle(req.params.id);
+
+        return res.status(200).json({
+            success: true,
+            message: "Vehicle deleted successfully",
+        });
+
+    } catch (error) {
+        next(error);
+    }
+
+};
 module.exports = {
     createVehicle: create,
      getAllVehicles: getAll,
      searchVehicles: search,
       updateVehicle: update,
+       deleteVehicle: remove,
 };
