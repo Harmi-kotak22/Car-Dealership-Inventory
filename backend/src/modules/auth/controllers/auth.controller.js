@@ -1,11 +1,19 @@
-class AuthController {
-  register(req, res) {
-    res.status(200).json({ message: 'Register route ready' });
-  }
+const { registerUser } = require("../services/auth.services");
 
-  login(req, res) {
-    res.status(200).json({ message: 'Login route ready' });
-  }
-}
+const register = async (req, res, next) => {
+    try {
+        const user = await registerUser(req.validatedData);
 
-module.exports = new AuthController();
+        return res.status(201).json({
+            success: true,
+            message: "User registered successfully",
+            data: user,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = {
+    register,
+};

@@ -3,4 +3,8 @@ const ROLES = Object.freeze({
     CUSTOMER: "CUSTOMER"
 });
 
-export default ROLES;
+module.exports = {
+    ROLES,
+    CUSTOMER: ROLES.CUSTOMER,
+    ADMIN: ROLES.ADMIN
+};

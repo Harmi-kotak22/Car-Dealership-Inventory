@@ -1,5 +1,5 @@
-import { Schema, model as _model } from "mongoose";
-import VEHICLE_CATEGORIES from "../../shared/constants/vehicleCategories";
+const { Schema, model: _model } = require("mongoose");
+const VEHICLE_CATEGORIES = require("../../shared/constants/vehicleCategories");
 
 const vehicleSchema = new Schema(
     {
@@ -50,4 +50,4 @@ vehicleSchema.index({
 
 const Vehicle = _model("Vehicle", vehicleSchema);
 
-export default Vehicle;
+module.exports = Vehicle;

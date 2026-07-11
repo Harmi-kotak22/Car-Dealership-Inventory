@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const authRoutes = require("./modules/auth/routes/auth.routes");
+
 
 const app = express();
 
@@ -17,5 +19,11 @@ app.get("/health", (req, res) => {
         message: "Server is running"
     });
 });
-
+app.use("/api/auth", authRoutes);
+app.use((err, req, res, next) => {
+    return res.status(err.statusCode || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+    });
+});
 module.exports = app;

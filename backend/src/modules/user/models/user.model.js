@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-const { ROLES, CUSTOMER } = require("../../shared/constants/roles");
+const { ROLES, CUSTOMER } = require("../../../shared/constants/roles");
 
 const userSchema = new Schema(
     {
@@ -14,6 +14,7 @@ const userSchema = new Schema(
         email: {
             type: String,
             required: [true, "Email is required"],
+            unique: true,
             lowercase: true,
             trim: true
         },
