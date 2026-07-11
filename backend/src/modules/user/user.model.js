@@ -1,13 +1,43 @@
-const mongoose = require('mongoose');
+import { Schema, model } from "mongoose";
+import ROLES, { CUSTOMER } from "../../shared/constants/roles";
 
-const userSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, default: 'customer' },
-  },
-  { timestamps: true }
+const userSchema = new Schema(
+    {
+        name: {
+            type: String,
+            required: [true, "Name is required"],
+            trim: true,
+            minlength: 2,
+            maxlength: 50
+        },
+
+        email: {
+            type: String,
+            required: [true, "Email is required"],
+            unique: true,
+            lowercase: true,
+            trim: true
+        },
+
+        password: {
+            type: String,
+            required: [true, "Password is required"]
+        },
+
+        role: {
+            type: String,
+            enum: Object.values(ROLES),
+            default: CUSTOMER
+        }
+    },
+    {
+        timestamps: true,
+        versionKey: false
+    }
 );
 
-module.exports = mongoose.model('User', userSchema);
+userSchema.index({ email: 1 }, { unique: true });
+
+const User = model("User", userSchema);
+
+export default User;
