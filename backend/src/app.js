@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const authRoutes = require("./modules/auth/routes/auth.routes");
 
+const testRoutes = require("./tests/testRoutes");
 
 const app = express();
 
@@ -19,7 +20,10 @@ app.get("/health", (req, res) => {
         message: "Server is running"
     });
 });
+app.use("/api/test", testRoutes);
+
 app.use("/api/auth", authRoutes);
+
 app.use((err, req, res, next) => {
     console.error(err);
 
