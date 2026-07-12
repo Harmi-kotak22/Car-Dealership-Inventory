@@ -300,7 +300,7 @@ function AdminDashboardPage() {
       </div>
 
       {/* Add / Edit Modal */}
-      <Modal open={isFormOpen} title={mode === 'edit' ? 'Edit Vehicle' : 'Add Vehicle'} onClose={reset}>
+      <Modal open={isFormOpen} title={mode === 'edit' ? 'Edit Vehicle' : 'Add Vehicle'} onClose={reset} maxWidth={520}>
         <form onSubmit={handleSubmit}>
           <div className="admin-form-grid">
             <div className="admin-form-field">
@@ -339,7 +339,7 @@ function AdminDashboardPage() {
       </Modal>
 
       {/* Delete / Restock confirm */}
-      <Modal open={isConfirmOpen} title={confirmType === 'delete' ? 'Delete Vehicle' : 'Restock Vehicle'} onClose={reset}>
+      <Modal open={isConfirmOpen} title={confirmType === 'delete' ? 'Delete Vehicle' : 'Restock Vehicle'} onClose={reset} maxWidth={420}>
         <div>
           <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: 16, lineHeight: 1.6 }}>
             {confirmType === 'delete'
