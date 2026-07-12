@@ -20,8 +20,6 @@ function SettingsPage() {
     e.preventDefault();
     const formData = new FormData(e.target);
     updateMutation.mutate({
-      email: formData.get('email'),
-      emailPassword: formData.get('emailPassword'),
       purchaseNotifications: formData.get('purchaseNotifications') === 'true',
       lowStockNotifications: formData.get('lowStockNotifications') === 'true',
       lowStockThreshold: parseInt(formData.get('lowStockThreshold')) || 5
@@ -43,59 +41,6 @@ function SettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit} style={{ maxWidth: 600 }}>
-        {/* Email Settings */}
-        <div className="admin-card" style={{ marginBottom: 16 }}>
-          <div className="admin-card-header">
-            <h3 className="admin-card-title">Email Configuration</h3>
-            <p className="admin-card-subtitle">Configure Gmail for notifications</p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: 6 }}>
-                Gmail Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                defaultValue={settings?.data?.email || ''}
-                placeholder="your@gmail.com"
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#e2e8f0',
-                  fontSize: '0.9rem'
-                }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: 6 }}>
-                Gmail App Password
-              </label>
-              <input
-                type="password"
-                name="emailPassword"
-                defaultValue={settings?.data?.emailPassword || ''}
-                placeholder="Enter app password"
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#e2e8f0',
-                  fontSize: '0.9rem'
-                }}
-              />
-              <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 4 }}>
-                Use an App Password from Google Account settings
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Notification Settings */}
         <div className="admin-card" style={{ marginBottom: 16 }}>
           <div className="admin-card-header">

@@ -7,7 +7,7 @@ class EmailService {
 
   async loadNodemailer() {
     if (this.nodemailer) return this.nodemailer;
-    
+
     try {
       this.nodemailer = require('nodemailer');
       return this.nodemailer;
@@ -21,25 +21,26 @@ class EmailService {
     const nodemailer = await this.loadNodemailer();
     if (!nodemailer) return null;
 
-    const settings = await Settings.getSettings();
-    
-    if (!settings.email || !settings.emailPassword) {
-      console.error('Email settings not configured');
+    const email = process.env.EMAIL_USER;
+    const password = process.env.EMAIL_PASSWORD;
+
+    if (!email || !password) {
+      console.error("Email credentials are missing.");
       return null;
     }
 
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: settings.email,
-        pass: settings.emailPassword
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
       }
     });
   }
 
   async sendPurchaseNotification(vehicle, customerName = 'Customer') {
     const settings = await Settings.getSettings();
-    
+
     if (!settings.purchaseNotifications) {
       return;
     }
@@ -48,8 +49,8 @@ class EmailService {
     if (!transporter) return;
 
     const mailOptions = {
-      from: settings.email,
-      to: settings.email,
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
       subject: `New Vehicle Purchase - ${vehicle.make} ${vehicle.model}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -83,7 +84,7 @@ class EmailService {
 
   async sendLowStockNotification(vehicle) {
     const settings = await Settings.getSettings();
-    
+
     if (!settings.lowStockNotifications) {
       return;
     }
@@ -96,8 +97,8 @@ class EmailService {
     if (!transporter) return;
 
     const mailOptions = {
-      from: settings.email,
-      to: settings.email,
+      from: process.env.EMAIL_USER,
+to: process.env.EMAIL_USER,
       subject: `Low Stock Alert - ${vehicle.make} ${vehicle.model}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

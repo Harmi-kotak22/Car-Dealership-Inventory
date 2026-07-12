@@ -132,9 +132,6 @@ function AdminDashboardPage() {
           <h1 className="admin-page-title">Inventory Overview</h1>
           <p className="admin-page-subtitle">Monitor stock levels, manage vehicles and track performance</p>
         </div>
-        <button className="admin-action-btn" onClick={openCreate}>
-          <FiPlus size={15} /> Add Vehicle
-        </button>
       </div>
 
       {notice && <div className="admin-alert admin-alert--success">{notice}</div>}
@@ -269,21 +266,6 @@ function AdminDashboardPage() {
         {/* Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* Quick Actions */}
-          <div className="admin-card">
-            <div className="admin-card-header">
-              <h3 className="admin-card-title">Quick Actions</h3>
-              <p className="admin-card-subtitle">Common inventory tasks</p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button className="admin-action-btn" style={{ justifyContent: 'flex-start' }} onClick={openCreate}>
-                <FiPlus size={14} /> Add New Vehicle
-              </button>
-              <button className="admin-action-btn admin-action-btn--secondary" style={{ justifyContent: 'flex-start', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <FiActivity size={14} /> Activity Log
-              </button>
-            </div>
-          </div>
 
           {/* Recent Activity */}
           <div className="admin-card">
