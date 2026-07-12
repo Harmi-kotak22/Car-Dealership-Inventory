@@ -11,6 +11,26 @@ export const searchVehicles = async (params) => {
   return response.data;
 };
 
+export const createVehicle = async (payload) => {
+  const response = await api.post(endpoints.vehicles.create, payload);
+  return response.data;
+};
+
+export const updateVehicle = async (vehicleId, payload) => {
+  const response = await api.put(endpoints.vehicles.update(vehicleId), payload);
+  return response.data;
+};
+
+export const deleteVehicle = async (vehicleId) => {
+  const response = await api.delete(endpoints.vehicles.delete(vehicleId));
+  return response.data;
+};
+
+export const restockVehicle = async (vehicleId, quantity) => {
+  const response = await api.post(endpoints.vehicles.restock(vehicleId), { quantity });
+  return response.data;
+};
+
 export const purchaseVehicle = async (vehicleId) => {
   const response = await api.post(endpoints.vehicles.purchase(vehicleId));
   return response.data;

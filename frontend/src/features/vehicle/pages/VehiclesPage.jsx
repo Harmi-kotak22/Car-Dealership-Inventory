@@ -31,9 +31,9 @@ function VehiclesPage() {
   const [page, setPage] = useState(1);
   const [error, setError] = useState(null);
 
-  const { data, isLoading, isFetching } = useQuery(
-    ['vehicles', search, category, minPrice, maxPrice],
-    () =>
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['vehicles', search, category, minPrice, maxPrice],
+    queryFn: () =>
       searchVehicles({
         make: search,
         model: search,
@@ -41,14 +41,12 @@ function VehiclesPage() {
         minPrice: Number(minPrice) > 0 ? Number(minPrice) : undefined,
         maxPrice: Number(maxPrice) > 0 ? Number(maxPrice) : undefined,
       }),
-    {
-      retry: false,
-      keepPreviousData: true,
-      onError: (err) => {
-        setError(err.response?.data?.message || 'Unable to load vehicles.');
-      },
-    }
-  );
+    retry: false,
+    keepPreviousData: true,
+    onError: (err) => {
+      setError(err.response?.data?.message || 'Unable to load vehicles.');
+    },
+  });
 
   const vehicles = data?.data || [];
 

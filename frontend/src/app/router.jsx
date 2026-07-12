@@ -8,6 +8,7 @@ import VehiclesPage from '../features/vehicle/pages/VehiclesPage';
 import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage';
 import AuthLayout from '../layouts/AuthLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
+import AdminLayout from '../layouts/AdminLayout';
 import useAuthStore from '../features/auth/store/authStore';
 
 function Router() {
@@ -31,7 +32,7 @@ function Router() {
       </Route>
 
       <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} user={user} requiredRole="ADMIN" />}>
-        <Route element={<DashboardLayout />}>
+        <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboardPage />} />
         </Route>
       </Route>
