@@ -280,9 +280,6 @@ function AdminDashboardPage() {
                 <FiPlus size={14} /> Add New Vehicle
               </button>
               <button className="admin-action-btn admin-action-btn--secondary" style={{ justifyContent: 'flex-start', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <FiRefreshCw size={14} /> Bulk Restock
-              </button>
-              <button className="admin-action-btn admin-action-btn--secondary" style={{ justifyContent: 'flex-start', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <FiActivity size={14} /> Activity Log
               </button>
             </div>

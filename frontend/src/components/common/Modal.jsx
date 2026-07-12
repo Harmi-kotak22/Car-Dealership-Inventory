@@ -2,8 +2,8 @@ function Modal({ children, open, title, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 px-4 py-6 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-[30px] border border-white/10 bg-[#071019] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 px-4 py-6 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-2xl rounded-[30px] border border-white/10 bg-[#071019] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4">
           <div>
             {title ? <h3 className="text-xl font-semibold text-white">{title}</h3> : null}

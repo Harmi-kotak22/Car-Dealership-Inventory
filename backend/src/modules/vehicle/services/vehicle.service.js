@@ -74,18 +74,13 @@ const searchVehicles = async (filters) => {
 
     const query = {};
 
-    if (filters.make) {
-        query.make = {
-        $regex: filters.make,
-        $options: "i",
-    };
-    }
-
-    if (filters.model) {
-         query.model = {
-        $regex: filters.model,
-        $options: "i",
-    };
+    // Search by make OR model (not AND)
+    if (filters.make || filters.model) {
+        const searchTerm = filters.make || filters.model;
+        query.$or = [
+            { make: { $regex: searchTerm, $options: "i" } },
+            { model: { $regex: searchTerm, $options: "i" } }
+        ];
     }
 
     if (filters.category) {
