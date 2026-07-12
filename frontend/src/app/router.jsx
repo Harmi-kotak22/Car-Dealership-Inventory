@@ -1,18 +1,39 @@
 import { Routes, Route } from 'react-router-dom';
+import ProtectedRoute from '../components/common/ProtectedRoute';
+import LoginPage from '../features/auth/pages/LoginPage';
+import RegisterPage from '../features/auth/pages/RegisterPage';
+import DashboardPage from '../features/dashboard/pages/DashboardPage';
+import LandingPage from '../features/landing/pages/LandingPage';
+import VehiclesPage from '../features/vehicle/pages/VehiclesPage';
+import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage';
 import AuthLayout from '../layouts/AuthLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
+import useAuthStore from '../features/auth/store/authStore';
 
 function Router() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
+
       <Route element={<AuthLayout />}>
-        <Route path="/login" element={<div>Login Page</div>} />
-        <Route path="/register" element={<div>Register Page</div>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Route>
 
-      <Route element={<DashboardLayout />}>
-        <Route path="/" element={<div>Dashboard Page</div>} />
-        <Route path="/vehicles" element={<div>Vehicles Page</div>} />
+      <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} user={user} requiredRole="CUSTOMER" />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/vehicles" element={<VehiclesPage />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} user={user} requiredRole="ADMIN" />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/admin" element={<AdminDashboardPage />} />
+        </Route>
       </Route>
     </Routes>
   );

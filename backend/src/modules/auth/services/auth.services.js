@@ -7,8 +7,9 @@ const {
 } = require("../../../shared/utils/password.utils");
 
 const { generateToken } = require("../../../shared/utils/jwt.utils");
+const { ADMIN_CODE } = require("../../../config/env");
 
-const registerUser = async ({ name, email, password }) => {
+const registerUser = async ({ name, email, password, adminCode }) => {
     const existingUser = await userRepository.findUserByEmail(email);
 
     if (existingUser) {
@@ -16,19 +17,40 @@ const registerUser = async ({ name, email, password }) => {
     }
 
     const hashedPassword = await hashPassword(password);
+    let role = "CUSTOMER";
+
+    if (adminCode) {
+        if (!ADMIN_CODE) {
+            throw new ApiError(500, "Admin signup is not configured");
+        }
+
+        if (adminCode !== ADMIN_CODE) {
+            throw new ApiError(401, "Invalid admin code");
+        }
+
+        role = "ADMIN";
+    }
 
     const user = await userRepository.createUser({
         name,
         email,
         password: hashedPassword,
-        role: "CUSTOMER",
+        role,
+    });
+
+    const token = generateToken({
+        id: user._id,
+        role: user.role,
     });
 
     return {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        token,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        },
     };
 };
 

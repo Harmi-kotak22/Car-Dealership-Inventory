@@ -21,6 +21,8 @@ const registerSchema = z
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
                 "Password must contain uppercase, lowercase and number"
             ),
+
+        adminCode: z.string().trim().optional(),
     })
     .strict();
 

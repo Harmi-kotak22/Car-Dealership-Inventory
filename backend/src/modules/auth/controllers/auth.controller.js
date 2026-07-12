@@ -5,12 +5,15 @@ const {
 
 const register = async (req, res, next) => {
     try {
-        const user = await registerUser(req.validatedData);
+        const result = await registerUser(req.validatedData);
 
         return res.status(201).json({
             success: true,
             message: "User registered successfully",
-            data: user,
+            data: {
+                token: result.token,
+                user: result.user,
+            },
         });
     } catch (error) {
         next(error);

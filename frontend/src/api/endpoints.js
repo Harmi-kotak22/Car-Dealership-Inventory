@@ -5,5 +5,7 @@ export const endpoints = {
   },
   vehicles: {
     list: '/vehicles',
+    search: '/vehicles/search',
+    purchase: (id) => `/vehicles/${id}/purchase`,
   },
 };
