@@ -981,6 +981,31 @@ select {
   color: #fca5a5;
 }
 
+.admin-report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 999px;
+  color: #a78bfa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.admin-report-btn:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.22);
+  color: #c4b5fd;
+}
+
+.admin-report-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Main content */
 .admin-main {
   flex: 1;

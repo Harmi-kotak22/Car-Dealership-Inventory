@@ -1,45 +1,37 @@
 import { motion } from 'framer-motion';
-import { FiUser, FiShield, FiBell, FiDatabase } from 'react-icons/fi';
-
-const settingsSections = [
-  {
-    icon: FiUser,
-    color: 'purple',
-    title: 'Profile Settings',
-    subtitle: 'Update your admin profile and preferences',
-    description: 'Profile management coming soon…',
-  },
-  {
-    icon: FiShield,
-    color: 'blue',
-    title: 'Security',
-    subtitle: 'Password and authentication settings',
-    description: 'Security settings coming soon…',
-  },
-  {
-    icon: FiBell,
-    color: 'amber',
-    title: 'Notifications',
-    subtitle: 'Configure alert and notification preferences',
-    description: 'Notification settings coming soon…',
-  },
-  {
-    icon: FiDatabase,
-    color: 'green',
-    title: 'Data Management',
-    subtitle: 'Backup, export, and data handling',
-    description: 'Data management coming soon…',
-  },
-];
-
-const iconStyles = {
-  purple: { background: 'rgba(124,58,237,0.15)', color: '#a78bfa' },
-  blue:   { background: 'rgba(59,130,246,0.15)',  color: '#93c5fd' },
-  amber:  { background: 'rgba(245,158,11,0.15)',  color: '#fbbf24' },
-  green:  { background: 'rgba(16,185,129,0.15)',  color: '#34d399' },
-};
+import { FiMail, FiBell, FiSave } from 'react-icons/fi';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { getSettings, updateSettings } from '../../../api/settings';
 
 function SettingsPage() {
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: getSettings
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateSettings,
+    onSuccess: () => {
+      alert('Settings saved successfully!');
+    }
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    updateMutation.mutate({
+      email: formData.get('email'),
+      emailPassword: formData.get('emailPassword'),
+      purchaseNotifications: formData.get('purchaseNotifications') === 'true',
+      lowStockNotifications: formData.get('lowStockNotifications') === 'true',
+      lowStockThreshold: parseInt(formData.get('lowStockThreshold')) || 5
+    });
+  };
+
+  if (isLoading) {
+    return <div style={{ color: '#94a3b8' }}>Loading settings...</div>;
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
 
@@ -50,28 +42,138 @@ function SettingsPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-        {settingsSections.map((section) => {
-          const Icon = section.icon;
-          const style = iconStyles[section.color];
-          return (
-            <div key={section.title} className="admin-card" style={{ cursor: 'default' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                <div className="admin-settings-icon" style={style}>
-                  <Icon size={20} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 className="admin-card-title">{section.title}</h3>
-                  <p className="admin-card-subtitle">{section.subtitle}</p>
-                </div>
-              </div>
-              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                <p style={{ fontSize: '0.82rem', color: '#334155' }}>{section.description}</p>
-              </div>
+      <form onSubmit={handleSubmit} style={{ maxWidth: 600 }}>
+        {/* Email Settings */}
+        <div className="admin-card" style={{ marginBottom: 16 }}>
+          <div className="admin-card-header">
+            <h3 className="admin-card-title">Email Configuration</h3>
+            <p className="admin-card-subtitle">Configure Gmail for notifications</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: 6 }}>
+                Gmail Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                defaultValue={settings?.data?.email || ''}
+                placeholder="your@gmail.com"
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#e2e8f0',
+                  fontSize: '0.9rem'
+                }}
+              />
             </div>
-          );
-        })}
-      </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: 6 }}>
+                Gmail App Password
+              </label>
+              <input
+                type="password"
+                name="emailPassword"
+                defaultValue={settings?.data?.emailPassword || ''}
+                placeholder="Enter app password"
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#e2e8f0',
+                  fontSize: '0.9rem'
+                }}
+              />
+              <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 4 }}>
+                Use an App Password from Google Account settings
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Notification Settings */}
+        <div className="admin-card" style={{ marginBottom: 16 }}>
+          <div className="admin-card-header">
+            <h3 className="admin-card-title">Notifications</h3>
+            <p className="admin-card-subtitle">Configure alert preferences</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500 }}>
+                  Purchase Notifications
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 2 }}>
+                  Notify when a customer purchases a vehicle
+                </p>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  name="purchaseNotifications"
+                  defaultChecked={settings?.data?.purchaseNotifications || false}
+                  style={{ width: 18, height: 18, cursor: 'pointer' }}
+                />
+                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Enabled</span>
+              </label>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 500 }}>
+                  Low Stock Alerts
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 2 }}>
+                  Notify when stock falls below threshold
+                </p>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  name="lowStockNotifications"
+                  defaultChecked={settings?.data?.lowStockNotifications || false}
+                  style={{ width: 18, height: 18, cursor: 'pointer' }}
+                />
+                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Enabled</span>
+              </label>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: 6 }}>
+                Low Stock Threshold
+              </label>
+              <input
+                type="number"
+                name="lowStockThreshold"
+                defaultValue={settings?.data?.lowStockThreshold || 5}
+                min="1"
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#e2e8f0',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={updateMutation.isPending}
+          className="admin-action-btn"
+          style={{ width: 'fit-content', minWidth: 140 }}
+        >
+          <FiSave size={14} />
+          {updateMutation.isPending ? 'Saving...' : 'Save Settings'}
+        </button>
+      </form>
 
     </motion.div>
   );

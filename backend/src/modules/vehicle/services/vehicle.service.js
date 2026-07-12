@@ -10,6 +10,7 @@ const vehicleRepository = require("../repositories/vehicle.repository");
 const { findAllVehicles } = require("../repositories/vehicle.repository");
 const mongoose = require("mongoose");
 const ApiError = require("../../../shared/errors/ApiError");
+const emailService = require("../../../shared/services/email.service");
 /**
  * Creates a new vehicle after validating the request payload.
  */
@@ -54,6 +55,9 @@ const purchaseVehicle = async (vehicleId) => {
 
     vehicle.quantity -= 1;
     await vehicle.save();
+
+    // Send purchase notification email if enabled
+    emailService.sendPurchaseNotification(vehicle);
 
     return vehicle;
 };
