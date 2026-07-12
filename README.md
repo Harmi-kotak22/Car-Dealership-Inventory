@@ -567,6 +567,8 @@ Artificial Intelligence was used as an engineering assistant throughout the deve
 
 - ChatGPT (OpenAI)
 - GitHub Copilot
+- Cursor
+- Winsurf
 
 ---
 
@@ -600,6 +602,14 @@ Used for:
 - CSS suggestions
 - Repetitive code completion
 - Faster frontend development
+
+- ### Windsurf and Cursor
+
+  Used for
+
+- Frontend development
+- Debugging issues of frontend development
+
 
 ---
 
