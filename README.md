@@ -10,15 +10,15 @@ A full-stack Car Dealership Inventory System built using **React**, **Node.js**,
 
 ### 🌐 Frontend (Vercel)
 
-**<YOUR_FRONTEND_URL>**
+**<Yhttps://car-dealership-inventory-gamma.vercel.app/>**
 
 ### 🚀 Backend API (Render)
 
-**<YOUR_BACKEND_URL>**
+**<https://car-dealership-inventory-vxqc.onrender.com>**
 
 ### 📂 GitHub Repository
 
-**<YOUR_GITHUB_REPO_URL>**
+**<https://github.com/Harmi-kotak22/Car-Dealership-Inventory>**
 
 ---
 
