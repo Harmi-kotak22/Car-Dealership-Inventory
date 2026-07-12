@@ -1,332 +1,369 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import Button from '../../../components/ui/Button';
-import Card from '../../../components/ui/Card';
-import PageHeader from '../../../components/ui/PageHeader';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { FiSearch, FiShoppingCart, FiCheckCircle, FiClock, FiShoppingBag } from 'react-icons/fi';
+import Toast from '../../../components/common/Toast';
+import PurchaseConfirmDialog from '../../../components/customer/PurchaseConfirmDialog';
 import { searchVehicles, purchaseVehicle } from '../../../api/vehicles';
 
-const pageSize = 6;
+const pageSize = 9;
+
 const sortOptions = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'price-low', label: 'Price Low' },
-  { value: 'price-high', label: 'Price High' },
+  { value: 'newest',     label: 'Newest First' },
+  { value: 'price-low',  label: 'Price: Low → High' },
+  { value: 'price-high', label: 'Price: High → Low' },
 ];
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(value);
+function fmt$(v) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+}
+
+function stockBadge(qty) {
+  if (qty === 0) return { label: 'Out of Stock', cls: 'cust-vehicle-stock-badge--out' };
+  if (qty <= 5)  return { label: 'Low Stock',    cls: 'cust-vehicle-stock-badge--low' };
+  return           { label: 'Available',          cls: 'cust-vehicle-stock-badge--available' };
 }
 
 function VehiclesPage() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
+  const [search,   setSearch]   = useState('');
   const [category, setCategory] = useState('All');
-  const [minPrice, setMinPrice] = useState('0');
-  const [maxPrice, setMaxPrice] = useState('400000');
-  const [sort, setSort] = useState('newest');
-  const [page, setPage] = useState(1);
-  const [error, setError] = useState(null);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sort,     setSort]     = useState('newest');
+  const [page,     setPage]     = useState(1);
+  const [purchaseDialog, setPurchaseDialog] = useState({ open: false, vehicle: null });
+  const [purchaseHistory, setPurchaseHistory] = useState([]);
+  const [toast,  setToast]  = useState(null);
+  const [justPurchasedId, setJustPurchasedId] = useState(null);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['vehicles', search, category, minPrice, maxPrice],
     queryFn: () =>
       searchVehicles({
-        make: search,
-        model: search,
+        make: search || undefined,
+        model: search || undefined,
         category: category === 'All' ? undefined : category,
-        minPrice: Number(minPrice) > 0 ? Number(minPrice) : undefined,
-        maxPrice: Number(maxPrice) > 0 ? Number(maxPrice) : undefined,
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
       }),
     retry: false,
     keepPreviousData: true,
-    onError: (err) => {
-      setError(err.response?.data?.message || 'Unable to load vehicles.');
-    },
   });
 
   const vehicles = data?.data || [];
 
-  useEffect(() => {
-    setPage(1);
-  }, [search, category, minPrice, maxPrice, sort]);
+  useEffect(() => { setPage(1); }, [search, category, minPrice, maxPrice, sort]);
 
   const categories = useMemo(
-    () => ['All', ...Array.from(new Set(vehicles.map((vehicle) => vehicle.category)))],
+    () => ['All', ...Array.from(new Set(vehicles.map((v) => v.category)))],
     [vehicles]
   );
 
-  const sortedVehicles = useMemo(() => {
+  const sorted = useMemo(() => {
     return [...vehicles].sort((a, b) => {
-      if (sort === 'price-low') return a.price - b.price;
+      if (sort === 'price-low')  return a.price - b.price;
       if (sort === 'price-high') return b.price - a.price;
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
   }, [vehicles, sort]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedVehicles.length / pageSize));
-  const paginatedVehicles = sortedVehicles.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const paginated  = sorted.slice((page - 1) * pageSize, page * pageSize);
 
-  const handlePurchase = async (id) => {
-    try {
-      setError(null);
-      await purchaseVehicle(id);
+  const purchaseMutation = useMutation({
+    mutationFn: purchaseVehicle,
+    onSuccess: (res) => {
+      const v = res.data;
+      setPurchaseHistory((prev) => [{ ...v, purchasedAt: new Date() }, ...prev].slice(0, 5));
+      setToast({ message: `Successfully purchased ${v.make} ${v.model}!`, type: 'success' });
+      setJustPurchasedId(v.id);
+      setTimeout(() => setJustPurchasedId(null), 2000);
       queryClient.invalidateQueries(['vehicles', search, category, minPrice, maxPrice]);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Unable to purchase vehicle.');
-    }
-  };
+      queryClient.invalidateQueries(['vehicles-summary']);
+      setPurchaseDialog({ open: false, vehicle: null });
+    },
+    onError: (err) => {
+      setToast({ message: err.response?.data?.message || 'Unable to complete purchase', type: 'error' });
+    },
+  });
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-      <PageHeader
-        title="Customer dashboard"
-        description="Browse available vehicles, compare price ranges, and complete your next purchase with confidence."
-      />
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
 
-      <section className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <Card className="space-y-6">
-          <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-violet-300">Welcome back</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Find your next ride</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
-              Use search, filters, and smart sorting to locate the perfect vehicle in stock.
+      {/* Page heading */}
+      <div className="admin-page-heading">
+        <div>
+          <h1 className="admin-page-title">Browse Vehicles</h1>
+          <p className="admin-page-subtitle">Explore our full inventory — filter, sort and purchase with ease</p>
+        </div>
+        {purchaseHistory.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: '#7c3aed', fontWeight: 600 }}>
+            <FiShoppingBag size={14} />
+            {purchaseHistory.length} purchase{purchaseHistory.length > 1 ? 's' : ''} this session
+          </div>
+        )}
+      </div>
+
+      {/* ── Filter bar ── */}
+      <div className="cust-filter-bar">
+        {/* Search */}
+        <div className="cust-filter-search-wrap">
+          <span className="cust-filter-search-icon"><FiSearch size={14} /></span>
+          <input
+            className="cust-filter-input"
+            placeholder="Search make or model…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Category */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span className="cust-filter-label">Type</span>
+          <select
+            className="cust-filter-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            {categories.map((c) => (
+              <option key={c} value={c} style={{ background: '#0d0b1a' }}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Price range */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span className="cust-filter-label">Price</span>
+          <div className="cust-filter-price-pair">
+            <input
+              type="number" min="0"
+              className="cust-filter-price-input"
+              placeholder="Min"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+            />
+            <span className="cust-filter-price-sep">–</span>
+            <input
+              type="number" min="0"
+              className="cust-filter-price-input"
+              placeholder="Max"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Sort */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span className="cust-filter-label">Sort</span>
+          <select
+            className="cust-filter-select"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+          >
+            {sortOptions.map((o) => (
+              <option key={o.value} value={o.value} style={{ background: '#0d0b1a' }}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Results count */}
+      <div className="cust-results-bar">
+        <p className="cust-results-count">
+          Showing <strong>{paginated.length}</strong> of <strong>{sorted.length}</strong> vehicles
+        </p>
+        {(search || category !== 'All' || minPrice || maxPrice) && (
+          <button
+            onClick={() => { setSearch(''); setCategory('All'); setMinPrice(''); setMaxPrice(''); }}
+            style={{ fontSize: '0.78rem', color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+          >
+            Clear filters ×
+          </button>
+        )}
+      </div>
+
+      {/* ── Vehicle grid ── */}
+      <AnimatePresence mode="wait">
+        {isLoading || isFetching ? (
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="cust-vehicle-grid">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} style={{
+                borderRadius: 20, overflow: 'hidden',
+                background: 'rgba(15,10,30,0.75)', border: '1px solid rgba(255,255,255,0.06)',
+                animation: 'pulse 1.5s ease-in-out infinite',
+              }}>
+                <div style={{ height: 180, background: 'rgba(255,255,255,0.04)' }} />
+                <div style={{ padding: '16px 18px' }}>
+                  <div style={{ height: 14, width: '60%', borderRadius: 8, background: 'rgba(255,255,255,0.04)', marginBottom: 10 }} />
+                  <div style={{ height: 18, width: '80%', borderRadius: 8, background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
+                  <div style={{ height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)' }} />
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        ) : paginated.length === 0 ? (
+          <motion.div key="empty" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            className="cust-empty-state">
+            <FiSearch size={36} style={{ color: '#334155', margin: '0 auto' }} />
+            <p className="cust-empty-title">No vehicles found</p>
+            <p className="cust-empty-sub">
+              Try adjusting your search, changing the category, or clearing the price range filters.
             </p>
-          </div>
+          </motion.div>
+        ) : (
+          <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="cust-vehicle-grid">
+            {paginated.map((v) => {
+              const badge = stockBadge(v.quantity);
+              const isJustPurchased = justPurchasedId === v.id;
+              return (
+                <motion.div
+                  key={v.id}
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="cust-vehicle-card"
+                >
+                  {/* Success overlay */}
+                  {isJustPurchased && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="cust-success-overlay"
+                    >
+                      <motion.div
+                        initial={{ scale: 0, rotate: -90 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 200 }}
+                        style={{ background: '#fff', borderRadius: '50%', padding: 14 }}
+                      >
+                        <FiCheckCircle size={36} style={{ color: '#10b981' }} />
+                      </motion.div>
+                    </motion.div>
+                  )}
 
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-[#09060f]/80 p-5">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Search vehicles</label>
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Make or model"
-                className="w-full rounded-3xl border border-white/10 bg-[#120b1e] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-500"
-              />
-            </div>
+                  {/* Image */}
+                  <div className="cust-vehicle-img-wrap">
+                    {v.image ? (
+                      <img src={v.image} alt={`${v.make} ${v.model}`} className="cust-vehicle-img" />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1e293b', fontSize: '2.5rem' }}>
+                        🚗
+                      </div>
+                    )}
+                    <span className={`cust-vehicle-stock-badge ${badge.cls}`}>{badge.label}</span>
+                  </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Category</label>
-              <select
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className="w-full rounded-3xl border border-white/10 bg-[#120b1e] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-500"
-              >
-                {categories.map((option) => (
-                  <option key={option} value={option} className="bg-[#09060f] text-white">
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">Min price</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={minPrice}
-                  onChange={(event) => setMinPrice(event.target.value)}
-                  className="w-full rounded-3xl border border-white/10 bg-[#120b1e] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-500"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">Max price</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={maxPrice}
-                  onChange={(event) => setMaxPrice(event.target.value)}
-                  className="w-full rounded-3xl border border-white/10 bg-[#120b1e] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">Sort by</label>
-              <select
-                value={sort}
-                onChange={(event) => setSort(event.target.value)}
-                className="w-full rounded-3xl border border-white/10 bg-[#120b1e] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-500"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-[#09060f] text-white">
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-[#09060f]/80 p-5 text-sm text-slate-400">
-            <p className="font-semibold text-white">Dashboard highlights</p>
-            <ul className="mt-3 space-y-3">
-              <li>• Instant pricing and availability across all categories</li>
-              <li>• Purchase directly from the dashboard</li>
-              <li>• Real-time stock updates on every vehicle</li>
-            </ul>
-          </div>
-        </Card>
-
-        <div className="space-y-6">
-          <div className="rounded-[32px] border border-white/10 bg-[#0f0b1e]/80 p-6 shadow-[0_25px_90px_rgba(0,0,0,0.26)] backdrop-blur-xl">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm uppercase tracking-[0.35em] text-violet-300">Available models</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Browse the latest inventory</h2>
-              </div>
-              <div className="rounded-full bg-white/5 px-4 py-2 text-sm text-slate-300">
-                {vehicles.length} vehicles found
-              </div>
-            </div>
-          </div>
-
-          <AnimatePresence mode="wait">
-            {isLoading || isFetching ? (
-              <motion.div
-                key="skeleton"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
-              >
-                {Array.from({ length: pageSize }).map((_, index) => (
-                  <Card key={index} className="animate-pulse bg-slate-900/70" hoverable={false}>
-                    <div className="mb-4 h-40 rounded-3xl bg-slate-800" />
-                    <div className="h-5 w-3/4 rounded-full bg-slate-800" />
-                    <div className="mt-4 h-4 w-1/2 rounded-full bg-slate-800" />
-                    <div className="mt-8 flex items-center justify-between gap-3">
-                      <div className="h-10 w-24 rounded-full bg-slate-800" />
-                      <div className="h-10 w-24 rounded-full bg-slate-800" />
-                    </div>
-                  </Card>
-                ))}
-              </motion.div>
-            ) : error ? (
-              <motion.div
-                key="error"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-[32px] border border-rose-500/20 bg-[#19090f]/90 p-10 text-center text-rose-300"
-              >
-                <p className="text-sm uppercase tracking-[0.35em] text-rose-300">Load failed</p>
-                <h3 className="mt-4 text-2xl font-semibold text-white">{error}</h3>
-              </motion.div>
-            ) : paginatedVehicles.length === 0 ? (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-[32px] border border-dashed border-white/15 bg-[#09060f]/90 p-10 text-center text-slate-300"
-              >
-                <p className="text-sm uppercase tracking-[0.35em] text-violet-300">No matches</p>
-                <h3 className="mt-4 text-2xl font-semibold text-white">We couldn't find any vehicles</h3>
-                <p className="mt-3 max-w-xl mx-auto text-sm leading-6 text-slate-400">
-                  Adjust your search, update price range, or clear filters to see more available models.
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="results"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
-              >
-                {paginatedVehicles.map((vehicle) => (
-                  <Card key={vehicle.id} className="overflow-hidden">
-                    <div className="relative overflow-hidden rounded-3xl">
-                      <img
-                        src={vehicle.image}
-                        alt={`${vehicle.make} ${vehicle.model}`}
-                        className="h-52 w-full object-cover transition duration-500 hover:scale-105"
-                      />
-                      {vehicle.quantity === 0 ? (
-                        <div className="absolute left-4 top-4 rounded-full bg-rose-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white">
-                          Out of stock
-                        </div>
-                      ) : (
-                        <div className="absolute left-4 top-4 rounded-full bg-violet-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white">
-                          {vehicle.category}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-5 flex items-start justify-between gap-4">
+                  {/* Body */}
+                  <div className="cust-vehicle-body">
+                    <div className="cust-vehicle-meta">
                       <div>
-                        <p className="text-sm uppercase tracking-[0.35em] text-slate-400">{new Date(vehicle.createdAt).getFullYear()}</p>
-                        <h3 className="mt-2 text-xl font-semibold text-white">{vehicle.make} {vehicle.model}</h3>
+                        <p className="cust-vehicle-year">{new Date(v.createdAt).getFullYear()}</p>
+                        <h3 className="cust-vehicle-name">{v.make} {v.model}</h3>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-semibold text-white">{formatCurrency(vehicle.price)}</p>
-                        <p className="mt-1 text-sm text-slate-400">{vehicle.quantity} in stock</p>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <p className="cust-vehicle-price">{fmt$(v.price)}</p>
+                        <p className="cust-vehicle-stock-count">
+                          {v.quantity === 0 ? 'No stock' : `${v.quantity} left`}
+                        </p>
                       </div>
                     </div>
 
-                    <p className="mt-4 text-sm leading-6 text-slate-400">
+                    <p className="cust-vehicle-desc">
                       Premium build quality, advanced safety systems, and an elevated driving experience.
                     </p>
 
-                    <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="rounded-full bg-white/5 px-3 py-2 text-sm text-slate-300">
-                        {vehicle.category}
-                      </div>
-                      <Button
-                        type="button"
-                        fullWidth
-                        disabled={vehicle.quantity === 0}
-                        className={vehicle.quantity === 0 ? 'cursor-not-allowed opacity-60' : ''}
-                        onClick={() => handlePurchase(vehicle.id)}
+                    <div className="cust-vehicle-footer">
+                      <span className="cust-category-pill">{v.category}</span>
+                      <button
+                        className="cust-purchase-btn"
+                        disabled={v.quantity === 0}
+                        onClick={() => setPurchaseDialog({ open: true, vehicle: v })}
                       >
-                        {vehicle.quantity === 0 ? 'Unavailable' : 'Purchase'}
-                      </Button>
+                        {v.quantity === 0 ? 'Out of Stock' : (
+                          <><FiShoppingCart size={13} /> Purchase</>
+                        )}
+                      </button>
                     </div>
-                  </Card>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          {!isLoading && !isFetching && paginatedVehicles.length > 0 ? (
-            <div className="flex flex-col gap-4 rounded-[32px] border border-white/10 bg-[#09060f]/80 px-6 py-5 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-              <p>
-                Page {page} of {totalPages}
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={page === 1}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  className={page === 1 ? 'cursor-not-allowed opacity-60' : ''}
-                >
-                  Previous
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                  className={page === totalPages ? 'cursor-not-allowed opacity-60' : ''}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="rounded-[32px] border border-white/10 bg-[#0f0b1e]/80 px-6 py-5 text-slate-400">
-            <p className="text-sm font-semibold text-white">Need help?</p>
-            <p className="mt-3 text-sm leading-6">
-              Our team is ready to assist with pricing details, financing options, and delivery scheduling. Reach out any time.
-            </p>
+      {/* ── Pagination ── */}
+      {!isLoading && !isFetching && sorted.length > pageSize && (
+        <div className="cust-pagination">
+          <span>Page {page} of {totalPages}</span>
+          <div className="cust-pagination-btns">
+            <button
+              className="cust-pagination-btn"
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              ← Previous
+            </button>
+            <button
+              className="cust-pagination-btn"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Next →
+            </button>
           </div>
         </div>
-      </section>
+      )}
+
+      {/* ── Purchase History (session) ── */}
+      {purchaseHistory.length > 0 && (
+        <div className="cust-history-card" style={{ marginTop: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <FiShoppingBag size={16} style={{ color: '#7c3aed' }} />
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
+              Session Purchase History
+            </h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {purchaseHistory.map((item, i) => (
+              <div key={i} className="cust-history-item">
+                <div>
+                  <p style={{ fontSize: '0.83rem', fontWeight: 600, color: '#e2e8f0', margin: '0 0 2px' }}>
+                    {item.make} {item.model}
+                  </p>
+                  <p style={{ fontSize: '0.73rem', color: '#475569', margin: 0 }}>
+                    {fmt$(item.price)} · {item.category}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.73rem', color: '#334155' }}>
+                  <FiClock size={12} />
+                  {item.purchasedAt && new Date(item.purchasedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Confirm purchase dialog */}
+      <PurchaseConfirmDialog
+        open={purchaseDialog.open}
+        onClose={() => setPurchaseDialog({ open: false, vehicle: null })}
+        onConfirm={() => purchaseDialog.vehicle && purchaseMutation.mutate(purchaseDialog.vehicle.id)}
+        vehicle={purchaseDialog.vehicle}
+        isSubmitting={purchaseMutation.isPending}
+      />
+
+      {toast && (
+        <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 100 }}>
+          <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        </div>
+      )}
     </motion.div>
   );
 }

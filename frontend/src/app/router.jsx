@@ -6,6 +6,10 @@ import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import LandingPage from '../features/landing/pages/LandingPage';
 import VehiclesPage from '../features/vehicle/pages/VehiclesPage';
 import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage';
+import AddVehiclePage from '../features/admin/pages/AddVehiclePage';
+import EditVehiclePage from '../features/admin/pages/EditVehiclePage';
+import VehicleListPage from '../features/admin/pages/VehicleListPage';
+import SettingsPage from '../features/admin/pages/SettingsPage';
 import AuthLayout from '../layouts/AuthLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
 import AdminLayout from '../layouts/AdminLayout';
@@ -34,6 +38,10 @@ function Router() {
       <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} user={user} requiredRole="ADMIN" />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/add-vehicle" element={<AddVehiclePage />} />
+          <Route path="/admin/vehicles" element={<VehicleListPage />} />
+          <Route path="/admin/edit/:id" element={<EditVehiclePage />} />
+          <Route path="/admin/settings" element={<SettingsPage />} />
         </Route>
       </Route>
     </Routes>

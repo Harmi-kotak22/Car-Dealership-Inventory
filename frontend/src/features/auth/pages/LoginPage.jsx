@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiMail, FiLock } from 'react-icons/fi';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
+import { FiUser, FiLock, FiLogIn } from 'react-icons/fi';
 import useAuthStore from '../store/authStore';
 import { loginUser } from '../../../api/auth';
 
@@ -18,62 +16,73 @@ function LoginPage() {
     event.preventDefault();
     setError(null);
     setLoading(true);
-
     try {
       const response = await loginUser({ email, password });
       setAuth(response.data.token, response.data.user);
-      navigate('/dashboard');
+      const role = response.data.user?.role;
+      navigate(role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to sign in.');
+      setError(err.response?.data?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full">
-      <div className="mb-8 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-violet-300">Welcome back</p>
-        <h2 className="mt-2 text-3xl font-semibold text-white">Sign in to your account</h2>
-        <p className="mt-3 text-sm text-slate-400">
-          Access your inventory dashboard and manage dealership sales with ease.
-        </p>
-      </div>
+    <div>
+      <h2 className="auth-heading">Welcome back</h2>
+      <p className="auth-subheading">Sign in to access your dealership dashboard.</p>
 
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        <Input
-          label="Email"
-          icon={<FiMail />}
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-        <Input
-          label="Password"
-          icon={<FiLock />}
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
+      <form onSubmit={handleSubmit}>
+        <div className="auth-input-group">
 
-        {error ? <p className="text-sm text-rose-400">{error}</p> : null}
+          {/* Email */}
+          <div className="auth-field">
+            <label className="auth-label">Email address</label>
+            <div className="auth-input-wrap">
+              <input
+                className={`auth-input ${error ? 'auth-input--error' : ''}`}
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+              <span className="auth-input-icon"><FiUser size={16} /></span>
+            </div>
+          </div>
 
-        <div className="pt-1">
-          <Button type="submit" fullWidth disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </Button>
+          {/* Password */}
+          <div className="auth-field">
+            <label className="auth-label">Password</label>
+            <div className="auth-input-wrap">
+              <input
+                className={`auth-input ${error ? 'auth-input--error' : ''}`}
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <span className="auth-input-icon"><FiLock size={16} /></span>
+            </div>
+            <a href="#" className="auth-forgot">Forgot password?</a>
+          </div>
+
         </div>
+
+        {error && <p className="auth-error" style={{ marginBottom: 16 }}>{error}</p>}
+
+        <button type="submit" className="auth-submit-btn" disabled={loading}>
+          {loading ? 'Signing in…' : (<>Sign In <FiLogIn size={16} /></>)}
+        </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-400">
-        New here?{' '}
-        <Link to="/register" className="font-medium text-violet-300 hover:text-white">
-          Create account
-        </Link>
+      <p className="auth-bottom-link">
+        Don&apos;t have an account?{' '}
+        <Link to="/register">Register</Link>
       </p>
     </div>
   );

@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiUser, FiMail, FiLock } from 'react-icons/fi';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
+import { FiUser, FiMail, FiLock, FiKey, FiUserPlus } from 'react-icons/fi';
 import useAuthStore from '../store/authStore';
 import { registerUser } from '../../../api/auth';
 
@@ -13,85 +11,134 @@ function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [adminCode, setAdminCode] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!agreed) {
+      setError('Please agree to the terms & conditions to continue.');
+      return;
+    }
     setError(null);
     setLoading(true);
-
     try {
       const response = await registerUser({ name, email, password, adminCode });
       const user = response.data.data?.user || response.data.user || { name, email };
       setAuth(response.data.data?.token || response.data.token, user);
       navigate(user.role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to register.');
+      setError(err.response?.data?.message || 'Unable to register. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full">
-      <div className="mb-8 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-violet-300">Join the club</p>
-        <h2 className="mt-2 text-3xl font-semibold text-white">Create your account</h2>
-        <p className="mt-3 text-sm text-slate-400">
-          Start managing inventory, customers, and sales from one premium dashboard.
-        </p>
-      </div>
+    <div>
+      <h2 className="auth-heading">Create account</h2>
+      <p className="auth-subheading">Join Prestige Motors and start managing your inventory.</p>
 
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        <Input
-          label="Full name"
-          icon={<FiUser />}
-          placeholder="Alex Carter"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          required
-        />
-        <Input
-          label="Email"
-          icon={<FiMail />}
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-        <Input
-          label="Password"
-          icon={<FiLock />}
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
-        <Input
-          label="Admin code (optional)"
-          type="text"
-          placeholder="Enter admin signup code"
-          value={adminCode}
-          onChange={(event) => setAdminCode(event.target.value)}
-        />
+      <form onSubmit={handleSubmit}>
+        <div className="auth-input-group">
 
-        {error ? <p className="text-sm text-rose-400">{error}</p> : null}
+          {/* Full name */}
+          <div className="auth-field">
+            <label className="auth-label">Full name</label>
+            <div className="auth-input-wrap">
+              <input
+                className="auth-input"
+                type="text"
+                placeholder="Alex Carter"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+              <span className="auth-input-icon"><FiUser size={16} /></span>
+            </div>
+          </div>
 
-        <div className="pt-1">
-          <Button type="submit" fullWidth disabled={loading}>
-            {loading ? 'Creating account...' : 'Create Account'}
-          </Button>
+          {/* Email */}
+          <div className="auth-field">
+            <label className="auth-label">Email address</label>
+            <div className="auth-input-wrap">
+              <input
+                className="auth-input"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+              <span className="auth-input-icon"><FiMail size={16} /></span>
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="auth-field">
+            <label className="auth-label">Password</label>
+            <div className="auth-input-wrap">
+              <input
+                className="auth-input"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+              <span className="auth-input-icon"><FiLock size={16} /></span>
+            </div>
+          </div>
+
+          {/* Admin code */}
+          <div className="auth-field">
+            <label className="auth-label">
+              Admin code{' '}
+              <span style={{ fontWeight: 400, color: '#9ca3af' }}>(optional)</span>
+            </label>
+            <div className="auth-input-wrap">
+              <input
+                className="auth-input"
+                type="text"
+                placeholder="Enter admin signup code"
+                value={adminCode}
+                onChange={(e) => setAdminCode(e.target.value)}
+                autoComplete="off"
+              />
+              <span className="auth-input-icon"><FiKey size={16} /></span>
+            </div>
+          </div>
+
         </div>
+
+        {/* Terms checkbox */}
+        <label className="auth-terms-row">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="auth-checkbox"
+          />
+          <span className="auth-terms-text">
+            I agree to the{' '}
+            <a href="#" className="auth-terms-link">terms &amp; conditions</a>
+          </span>
+        </label>
+
+        {error && <p className="auth-error" style={{ marginBottom: 16 }}>{error}</p>}
+
+        <button type="submit" className="auth-submit-btn" disabled={loading}>
+          {loading ? 'Creating account…' : (<>Sign Up <FiUserPlus size={16} /></>)}
+        </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-400">
+      <p className="auth-bottom-link">
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-violet-300 hover:text-white">
-          Sign in
-        </Link>
+        <Link to="/login">Login</Link>
       </p>
     </div>
   );

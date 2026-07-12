@@ -6,6 +6,11 @@ export const getVehicles = async () => {
   return response.data;
 };
 
+export const getVehicleById = async (vehicleId) => {
+  const response = await api.get(endpoints.vehicles.update(vehicleId));
+  return response.data;
+};
+
 export const searchVehicles = async (params) => {
   const response = await api.get(endpoints.vehicles.search, { params });
   return response.data;
