@@ -10,7 +10,7 @@ A full-stack Car Dealership Inventory System built using **React**, **Node.js**,
 
 ### 🌐 Frontend (Vercel)
 
-**<Yhttps://car-dealership-inventory-gamma.vercel.app/>**
+**<https://car-dealership-inventory-gamma.vercel.app/>**
 
 ### 🚀 Backend API (Render)
 
@@ -525,25 +525,25 @@ VITE_API_URL=
 
 ## Customer Dashboard
 
-![Customer](screenshots/customer-dashboard.png)
+![Customer](screenshots/customer_dashboard.png)
 ![Customer](screenshots/customer_dashboard_2.png)
-![Customer](screenshots/customer-dashboard_3.png)
-![Customer](screenshots/customer-dashboard_4.png)
+![Customer](screenshots/customer_dashboard_3.png)
+![Customer](screenshots/customer_dashboard_4.png)
 
 
 ---
 
 ## Admin Dashboard
 
-![Admin](screenshots/admin-dashboard.png)
+![Admin](screenshots/admin_dashboard.png)
 
-![Customer](screenshots/admin-dashboard_3.png)
+![Customer](screenshots/admin_dashboard_3.png)
 
 ---
 
 ## Vehicle Inventory
 
-![Customer](screenshots/admin-dashboard_2.png)
+![Customer](screenshots/admin_dashboard_2.png)
 
 ---
 
